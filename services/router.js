@@ -235,6 +235,9 @@ Router.load = function (target, link, args, callback) {
             $(target).attr('component', link);
             console.info('Module loaded: '+link+' ->', target);
         }
+        if (args) {
+            $(target).triggerHandler('arguments', args);
+        }
         if (me.jendri.testing) {
             verifyModule(function (e) {
                 if (callback) callback(e, target, link, arguments);
