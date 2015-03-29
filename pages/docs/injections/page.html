@@ -1,0 +1,29 @@
+<h2>Jendri injections</h2>
+<p>
+    If you know that your service, widget or page will always use a service, you can say Jendri to preload it by putting
+    it's name or tag onto one of the fields of your <a href="docs/environment">environment object</a>:
+</p>
+<pre>
+    me.less = 'less';
+</pre>
+<p>
+    If any of required for your module services will fail, Jendri will trigger the 'depfail' event on your
+    environment object. You can control the service loading mechanism by putting these prefixes before
+    the required service name:
+</p>
+<ul>
+    <li>$ — to signal Jendri that it shouldn't wait until the service will register itself because this service is not
+    compatible with Jendri. In this case Jendri will try to register the global object with the same name as the required
+    service and pass this object to your module.</li>
+    <li>
+        ~ — to signal Jendri that this service is optional and it should not stop load your module and emit the 'depfail'
+        event even if the service will fail to load.
+    </li>
+</ul>
+<p>
+    After all of the requested services are loaded, Jendri will emit the 'start' or 'create' event on your module
+    (depends on type of your module).
+</p>
+<p>
+    To make your life easier, Jendri automatically injects itself into the field "me.jendri" of your environment object.
+</p>

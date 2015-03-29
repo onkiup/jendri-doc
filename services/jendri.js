@@ -16,7 +16,6 @@
         if (AppCache) {
             AppCache.load(file, options);
         } else {
-            console.log('Jendri is loading service', file, 'by ajax', AppCache);
             $.ajax(file, options);
         }
     }

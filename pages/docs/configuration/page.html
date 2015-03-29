@@ -1,0 +1,58 @@
+<h4>Jendri configuration</h4>
+<p>
+    To change Jendri behavior and integrate it in your project easily, you can change some configuration values in the
+    global object called "Jendri". In example, here is a part of this website index.html:
+</p>
+<pre>
+    &lt;HEAD>
+        &lt;script type="text/javascript">
+            window.Jendri = {
+                source: "/jendri/",
+                container: '#main_content',
+                debug: true,
+                siteVersion: '1.6',
+                interface: 'docs',
+                home: 'docs'
+            }
+        &lt;/script>
+        &lt;script type="application/javascript" src="/jendri/lib/jquery-2.1.1.min.js">&lt;/script>
+        &lt;script type="application/javascript" src="/jendri/services/jendri.js">&lt;/script>
+</pre>
+<p>
+    All of configuration variables are listed here:
+</p>
+<ul>
+    <li>
+        <b>source</b> — relative url of Jendri files location (default: "")
+    </li>
+    <li>
+        <b>startup</b> — startup service (default: "router")
+    </li>
+    <li>
+        <b>home</b> — default index page (default: "index")
+    </li>
+    <li>
+        <b>debug</b> — console debug level (default: false)
+        <p>Possible values:</p>
+        <ul>
+            <li><tt>&lt;true|"on"&gt;</tt> - console calls are enabled, calls not supported by a browser are silently
+                ignored
+            </li>
+            <li><tt>&lt;false|"off"&gt;</tt> - all console calls are silently ignored</li>
+            <li><tt>&lt;"log"|"debug"|"info"|"warn"|"error"&gt;</tt> - all <tt>console</tt> calls are disabled except
+                logging calls with a logging level that is equal or greater than the provided threshold
+            </li>
+        </ul>
+        <br/>
+    </li>
+    <li>
+        <b>container</b> — selector of an element that Jendri will use as an interfaces html-container (default: "body")
+    </li>
+    <li>
+        <b>siteVersion</b> — version of the site, used by appcache service to determine cache validity
+        (default: undefined — disable cache)
+    </li>
+    <li>
+        <b>interface</b> — name of the interface that will be loaded as default (default: "default")
+    </li>
+</ul>
