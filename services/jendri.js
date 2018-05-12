@@ -207,6 +207,8 @@
         return origAppend.apply(this, arguments).trigger("append");
     };
 
+    J.callbacks = {};
+
 // Starting application
 
     window.DEBUG = Jendri.debug;

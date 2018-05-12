@@ -1,0 +1,14 @@
+{
+  "name": "jendri",
+  "version": "0.0.1",
+  "description": "Full-stack javascript framework with embedded server",
+  "homepage":  "http://chedim.github.io/jendri/",
+  "license": "GPL-3.0",
+  "author": "Dmitrii Chechetkin <chedim@chedim.com> (http://github.com/chedim)",
+  "bin": {
+    "jendri": "./jendri.js"
+  },
+  "config": {
+    "port": "8888"
+  }
+}
