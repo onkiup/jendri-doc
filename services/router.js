@@ -23,27 +23,7 @@ var uiReady = false;
  */
 Router.init = function () {
     console.log('Routerinit');
-    Router.setUI(me.jendri.interface, function () {
-        console.log('Starting router checker');
-        var routerChecker = setInterval(function () {
-            if (window.location.hash !== previousLoadedAnchor) {
-                $(window.location).trigger('change');
-                try {
-                    console.log('Reloading page', uiReady);
-                    Router.reload(function () {
-                        if (!me.jendri.debug)
-                            console.clear();
-                    });
-                } catch (e) {
-                    alert("Client error.");
-                    clearInterval(routerChecker);
-                    if (!me.jendri.debug)
-                        console.clear();
-                    throw e;
-                }
-            }
-        }, 100);
-    });
+    Router.setUI(me.jendri.interface);
 }
 
 $(window).on('beforeunload', function (e) {
@@ -158,19 +138,8 @@ Router.default = function (link) {
 //
 Router.reload = function (cb) {
     if (!uiReady) return;
-    var link = decodeLink(window.location.hash.substr(1));
-    if (!link.page) {
-        link.page = me.jendri.home;
-    }
-    console.log('Link:', link, 'Previous:', previousLoadedPage);
-    if (link != previousLoadedPage) {
-        this.load(mainContainer, 'pages/' + link.page, link.args, cb);
-        previousLoadedAnchor = window.location.hash;
-        previousLoadedPage = link.page;
-    } else {
-        $(mainContainer).trigger('arguments', link.args);
-        if (cb) cb();
-    }
+    $(mainContainer).trigger('arguments', link.args);
+    if (cb) cb();
 }
 
 Router.uiReady = function (b) {
@@ -182,6 +151,9 @@ Router.isUiReady = function () {
 }
 
 Router.load = function (target, link, args, callback) {
+    if (!link.substr(0, Math.min(link.length, 20)).match("://")) {
+        link = base + link;
+    }
     console.log('!!!', 'loading', link, 'to', target);
     if (typeof target == "string") {
         target = $(target, $(me.jendri.container));
@@ -255,7 +227,7 @@ Router.load = function (target, link, args, callback) {
     }
 
     var loadStyle = function (error) {
-        ajax(me.jendri.source + link + '/style.' + ((me.less) ? 'less' : 'css'), {
+        ajax(link + '/style.' + ((me.less) ? 'less' : 'css'), {
             dataType: 'text',
             success: function (data) {
                 var addStyle = function (css) {
@@ -286,13 +258,13 @@ Router.load = function (target, link, args, callback) {
     }
 
     var loadCode = function (error) {
-        var sourceUrl = me.jendri.source + link + '/code.js';
+        var sourceUrl = link + '/code.js';
         ajax(sourceUrl, {
             dataType: 'text',
             success: function (data) {
                 var code = '//# sourceURL=' + jj.baseURL() + sourceUrl + '\n' + data;
 
-                var fun = function (me, c, $, console, jj) {
+                var fun = function (me, c, $, console, jj, R) {
                     var window = me, document = c;
                     eval(code);
                 }
@@ -306,8 +278,9 @@ Router.load = function (target, link, args, callback) {
                     return $.apply(null, arguments);
                 };
                 fakeJQuery.__proto__ = $;
-                var deps = Router.getIds(target);
-                fun.apply(deps, [deps, target, fakeJQuery, console, jj]);
+                var ids = Router.getIds(target);
+                var deps = {};
+                fun.apply(deps, [deps, target, fakeJQuery, console, jj, ids]);
                 console.info(link, 'code.');
                 $(target).process(deps);
                 moduleCode = deps;
@@ -367,7 +340,7 @@ Router.load = function (target, link, args, callback) {
         loadStyle(result);
     }
 
-    ajax(me.jendri.source + link + '/page.html', {
+    ajax(link + '/page.html', {
         success: function (data) {
             console.log(link, 'html');
             var content = $(target).html();
@@ -438,8 +411,45 @@ Router.getIds = function (container) {
     return result;
 }
 
-Router.navigate = function (url) {
-    window.location.hash = url;
+Router.navigate = function (url, cb) {
+    var navigator = function () {
+        if (url.substr(0, base.length) === base) {
+            url = url.substr(base.length);
+        } else if (url.substr(0, Math.min(20, url.length)).match('://')) {
+            window.location.href = url;
+        }
+        var link = decodeLink(url);
+        if (!link.page) {
+            link.page = jj.home;
+        }
+        if (link.page !== previousLoadedPage) {
+            Router.load(mainContainer, "pages/" + link.page, link.args, function (err) {
+                if (!err) {
+                    $(window.location).triggerHandler('change');
+                } else {
+                    previousLoadedPage = link.page;
+                }
+
+                if (cb) {
+                    cb(err);
+                }
+            })
+        } else {
+            Router.reload(cb);
+        }
+    };
+
+    if (!uiReady) {
+        Router.setUI(Jendri.interface, function (err) {
+            if (err && cb) {
+                cb(err);
+            } else if (!err) {
+                navigator();
+            }
+        });
+    } else {
+        navigator();
+    }
 }
 
 Router.getCurrentPage = function () {
@@ -456,7 +466,7 @@ Router.getMainContainer = function () {
     return mainContainer;
 }
 
-services.router = Router;
+exports.router = Router;
 
 me.create = function () {
     console.log("Router me.create");
