@@ -3,7 +3,7 @@
     // ------ Dependency Injection
     var options = {
         source: 'client',
-        startup: 'router',
+        startup: 'navigation',
         home: 'index',
         debug: false,
         container: 'body',
@@ -60,6 +60,10 @@
     };
 
     var base = location.href;
+    var hashAt = base.indexOf('#');
+    if (hashAt !== -1) {
+        base = base.substr(0, hashAt);
+    }
     var questionAt = base.indexOf('?');
     if (questionAt !== -1) {
         base = base.substr(0, questionAt);
@@ -156,7 +160,7 @@
                 // dependencies
                 var module = {};
                 var exp = {}
-                fun.apply(module, [module, exp, $, Jendri]);
+                fun.apply(module, [module, exp, jQuery, Jendri]);
 
                 // injecting Jendri
                 if (!module.jendri || module.jendri == 'jendri') module.jendri = Jendri;
@@ -197,6 +201,11 @@
                         if (e && optional) {
                             e = undefined;
                             d = undefined;
+                            console.error("optional dependency", key, "for", location, "not loaded");
+                        } else if (e) {
+                            console.error("dependency", key, "for", location, "failed")
+                        } else {
+                            console.info("dependency", key, "for", location, "loaded")
                         }
                         return resolvedDependencyCallback(e, key, d);
                     });
@@ -207,6 +216,7 @@
                     var dependency = module[key];
                     console.log('Dep#', i, ':', key, '<-', typeof dependency, dependency);
                     if (typeof dependency === 'string') {
+                        console.log("dynamic dependency for", location, ":", dependency);
                         resolveDependency(key, dependency);
                     } else if (typeof dependency === 'function') {
                         // a shortcut for event listeners
@@ -218,6 +228,7 @@
                         --tasks;
                     }
                 }
+                console.info("async dependencies for", location, ":", tasks);
                 if (tasks == 0) {
                     return onDependenciesResolved();
                 }

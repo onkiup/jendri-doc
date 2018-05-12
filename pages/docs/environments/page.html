@@ -1,0 +1,31 @@
+<h2>Jendri environments</h2>
+<p>
+    Every module that loaded by Jendri, runs in it's own closure that we call 'environment'. Environments are
+    usually represented by three predefined objects:
+</p>
+<ul>
+    <li>
+        <b>me</b> — the "process" object that contains a link to the closure of your module code.
+        This object is used for dependency injections and to emit service events; This object is public and can be
+        accessed by other modules.
+    </li>
+    <li>
+        <b>c</b> — the html-container object. Inaccessible in services. Pages and widgets should not make any DOM
+        manipulations anywhere except for this object and it's contents. Used for emitting lifecycle events in
+        pages and widgets.
+    </li>
+    <li>
+        <b>$</b> — the JQuery object, linked to the html-container object, so you can use $ function and not be concerned
+        about modifying contents outside of your html-container.
+    </li>
+    <li>
+        <b></b>
+    </li>
+</ul>
+<p>
+    You can obtain the process object by calling "procces" jquery plugin on a widget html-container:
+</p>
+<pre>
+    var widget_process = $(widget_container).process();
+    // widget_process now contains the process object of a widget.
+</pre>
