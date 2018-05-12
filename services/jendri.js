@@ -58,17 +58,7 @@
 
     };
 
-    var base = location.href;
-    var hashAt = base.indexOf('#');
-    if (hashAt !== -1) {
-        base = base.substr(0, hashAt);
-    }
-    var questionAt = base.indexOf('?');
-    if (questionAt !== -1) {
-        base = base.substr(0, questionAt);
-    }
-    var lastSlashAt = base.lastIndexOf('/');
-    base = base.substr(0, lastSlashAt) + '/';
+    var base = location.protocol + "://" + location.hostname + (location.port != 80 ? ":" + location.port : "") + Jendri.source;
 
     Jendri.baseURL = function () {
         return base;
