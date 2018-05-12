@@ -18,11 +18,11 @@ var processOptions = function () {
     eval(otherOptions);
 }
 
-$(c).on('start', function () {
+me.start = function () {
     processOptions();
-});
+}
 
-$(c).on('resume', function () {
+me.resume = function () {
     console.log('map options:', options);
     map = new google.maps.Map(c, options);
-})
+}

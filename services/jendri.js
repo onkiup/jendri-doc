@@ -58,6 +58,18 @@
 
     };
 
+    var base = location.href;
+    var questionAt = base.indexOf('?');
+    if (questionAt !== -1) {
+        base = base.substr(0, questionAt);
+    }
+    var lastSlashAt = base.lastIndexOf('/');
+    base = base.substr(0, lastSlashAt) + '/';
+
+    Jendri.baseURL = function () {
+        return base;
+    }
+
     Jendri.read = function (tag) {
         if (hash[tag] && hash[tag].length > 0) {
             return services[hash[tag][0]];
@@ -82,7 +94,7 @@
             } else {
                 tagCb[tag] = [callback];
                 console.log('loading', tag, hash[tag]);
-                loadService(Jendri.source + '/services/' + tag + '.js', function (e) {
+                loadService(Jendri.source + 'services/' + tag + '.js', function (e) {
                     console.log('loaded', tag, services[tag]);
                     if (e) {
                         console.error('Service not loaded:', e);
@@ -136,11 +148,14 @@
             dataType: 'text',
             success: function (data) {
                 console.log('Loaded service:', location);
-                var code = '// ' + location + '\n' +
-                    'var me = this;\n';
-                var fun = new Function('$', code + data);
+                var code = data + '\n//# sourceURL=' + base + location;
+                var fun = function (me, exports, $, jj) {
+                    eval(code);
+                }
                 // dependencies
-                var module = new fun($);
+                var module = {};
+                var exp = {}
+                fun.apply(module, [module, exp, $, Jendri]);
 
                 // injecting Jendri
                 if (!module.jendri || module.jendri == 'jendri') module.jendri = Jendri;
@@ -150,6 +165,9 @@
                 var depResolvingError = undefined;
 
                 var onDependenciesResolved = function (e) {
+                    for (var ex in exp) {
+                        Jendri.register(ex, exp[ex]);
+                    }
                     console.log('Dependencies of', location, 'resolved', e);
                     if (!e) $(module).triggerHandler('create');
                     if (cb) return cb(e);
@@ -182,17 +200,25 @@
                         return resolvedDependencyCallback(e, key, d);
                     });
                 }
-                if (deps.length == 0) return onDependenciesResolved();
+                if (deps.length === 0) return onDependenciesResolved();
                 for (var i = 0; i < deps.length; i++) {
                     var key = deps[i];
                     var dependency = module[key];
-                    console.log('Dep#', i, ':', key, '<-', dependency);
-                    if (typeof dependency != 'string') {
-                        resolvedDependencyCallback();
-                        continue;
-                    } else {
+                    console.log('Dep#', i, ':', key, '<-', typeof dependency, dependency);
+                    if (typeof dependency === 'string') {
                         resolveDependency(key, dependency);
+                    } else if (typeof dependency === 'function') {
+                        // a shortcut for event listeners
+                        console.info("registering shortcut for", key, "event; handler:", dependency);
+                        $(module).on(key, dependency);
+                        delete module[key];
+                        --tasks;
+                    } else if (typeof dependency === 'object') {
+                        --tasks;
                     }
+                }
+                if (tasks == 0) {
+                    return onDependenciesResolved();
                 }
             },
             error: function (a, b, e) {
