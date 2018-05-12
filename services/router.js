@@ -2,7 +2,7 @@
 me.jendri = 'jendri';
 me.async = '$async';
 me.scoped = '$jquery.scoped';
-me.less = '~$less';
+me.less = '~less';
 me.testing = 'jendri.testing';
 me.jsext = '$jsext';
 me.appcache = '~appcache';
@@ -23,14 +23,14 @@ var uiReady = false;
  */
 Router.init = function () {
     console.log('Routerinit');
-    Router.setUI(me.jendri.interface, function() {
+    Router.setUI(me.jendri.interface, function () {
         console.log('Starting router checker');
         var routerChecker = setInterval(function () {
             if (window.location.hash !== previousLoadedAnchor) {
                 $(window.location).trigger('change');
                 try {
                     console.log('Reloading page', uiReady);
-                    Router.reload(function() {
+                    Router.reload(function () {
                         if (!me.jendri.debug)
                             console.clear();
                     });
@@ -111,6 +111,7 @@ Router.setUI = function (ui, cb) {
             $(me.jendri.container).append(interfaceComponent);
         }
         uiReady = false;
+        me.less.setTheme("interfaces/" + link.page + "/theme.less");
         interfaceName = link.page;
         console.log('router loading interface', link.page);
         Router.load(interfaceComponent, 'interfaces/' + link.page, link.args, function () {
@@ -198,7 +199,7 @@ Router.load = function (target, link, args, callback) {
     var moduleCode;
     lock.push(target);
 
-    var ajax = function(file, options) {
+    var ajax = function (file, options) {
         if (me.appcache) {
             me.appcache.load(file, options);
         } else {
@@ -233,7 +234,7 @@ Router.load = function (target, link, args, callback) {
         } else {
             $(target).removeClass('loading_component');
             $(target).attr('component', link);
-            console.info('Module loaded: '+link+' ->', target);
+            console.info('Module loaded: ' + link + ' ->', target);
         }
         if (args) {
             $(target).triggerHandler('arguments', args);
@@ -266,10 +267,8 @@ Router.load = function (target, link, args, callback) {
                 console.log('LESS>', me.less);
                 if (me.less) {
                     data = '*[component="' + link + '"] {\n' + data + '\n}';
-                    var parser = new (me.less.Parser);
-                    parser.parse(data, function (e, tree) {
+                    me.less.render(data, uiReady, function (e, css) {
                         if (e) return loadCode(e);
-                        var css = tree.toCSS();
                         addStyle(css);
                     })
                 } else {
@@ -287,29 +286,38 @@ Router.load = function (target, link, args, callback) {
     }
 
     var loadCode = function (error) {
-        ajax(me.jendri.source + link + '/code.js', {
+        var sourceUrl = me.jendri.source + link + '/code.js';
+        ajax(sourceUrl, {
             dataType: 'text',
             success: function (data) {
-                var code = '// ' + link + '\n' +
-                    'var me = this;\n';
+                var code = '//# sourceURL=' + jj.baseURL() + sourceUrl + '\n' + data;
 
-                var fun = new Function('c', '$', code + data);
-                var fakeJQuery = function() {
+                var fun = function (me, c, $, console, jj) {
+                    var window = me, document = c;
+                    eval(code);
+                }
+
+                var fakeJQuery = function () {
                     if (arguments.length == 1 && typeof arguments[0] == 'string') {
                         arguments = [arguments[0], target];
+                    } else if (arguments.length == 0) {
+                        return $(target);
                     }
                     return $.apply(null, arguments);
                 };
                 fakeJQuery.__proto__ = $;
-                var deps = new fun(target, fakeJQuery);
-                console.info(link,'code.');
+                var deps = Router.getIds(target);
+                fun.apply(deps, [deps, target, fakeJQuery, console, jj]);
+                console.info(link, 'code.');
                 $(target).process(deps);
                 moduleCode = deps;
                 me.async.forEach(Object.keys(deps), function (key, cb) {
-                    if(typeof deps[key] == 'function') {
+                    if (typeof deps[key] === 'function') {
                         // binding an event to the container
+                        console.info("Registering event", key, "on", target, "with handler", deps[key]);
                         fakeJQuery().on(key, deps[key]);
-                    } else if (typeof deps[key] == 'string') {
+                        cb();
+                    } else if (typeof deps[key] === 'string') {
                         // this is a dependency, we need to load it and pass
                         // reference to it to the module
                         me.jendri.get(deps[key], function (e, m) {
@@ -327,15 +335,15 @@ Router.load = function (target, link, args, callback) {
                         err.previousError = error;
                         fin(err);
                     } else {
-                        console.log('Dependencies resolved for', link+'@', target);
+                        console.log('Dependencies resolved for', link + '@', target);
                         console.warn('start:', link, target);
                         $(target).triggerHandler('start', args);
-                        target.$wait(function() {
+                        target.$wait(function () {
                             console.warn('Start completed:', link, target);
-                            Router.widgetize(target, function() {
+                            Router.widgetize(target, function () {
                                 console.warn('resume:', link);
                                 $(target).triggerHandler('resume');
-                                target.$wait(function() {
+                                target.$wait(function () {
                                     console.log('resume complete:', link);
                                     fin();
                                 });
@@ -345,8 +353,8 @@ Router.load = function (target, link, args, callback) {
                 });
             },
             error: function (a, b, e) {
-                console.error('No code found for', link, e);
-                Router.widgetize(target, function() {
+                console.info('No code found for', link, e);
+                Router.widgetize(target, function () {
                     e.previousError = error;
                     if (!error) e = null;
                     fin(e);
@@ -359,11 +367,11 @@ Router.load = function (target, link, args, callback) {
         loadStyle(result);
     }
 
-    ajax(me.jendri.source+ link + '/page.html', {
+    ajax(me.jendri.source + link + '/page.html', {
         success: function (data) {
             console.log(link, 'html');
             var content = $(target).html();
-            console.log('-->',link, 'content', target, content);
+            console.log('-->', link, 'content', target, content);
             var template = $(data);
             $('content', template).html(content);
             $(target).html('');
@@ -421,6 +429,15 @@ Router.widgetize = function (target, callback) {
     }
 }
 
+Router.getIds = function (container) {
+    var identifiables = $('*[id]', container);
+    var result = {};
+    me.async.forEach(identifiables, function (value) {
+        result[$(value).attr('id')] = value;
+    })
+    return result;
+}
+
 Router.navigate = function (url) {
     window.location.hash = url;
 }
@@ -439,19 +456,20 @@ Router.getMainContainer = function () {
     return mainContainer;
 }
 
+services.router = Router;
 
-$(me).on('create', function () {
-    me.jendri.register('router', Router);
+me.create = function () {
+    console.log("Router me.create");
     Router.init();
-})
+}
 
 
-$(me).on('depfail', function (e, name) {
+me.depfail = function (e, name) {
     console.log('Router: depfail:', name);
     return null;
-});
+}
 
-jQuery.fn.process = function() {
+jQuery.fn.process = function () {
     if (arguments[0]) {
         $(this).data('process', arguments[0]);
     } else {

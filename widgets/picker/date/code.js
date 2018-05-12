@@ -28,7 +28,7 @@ $(c).on('start', function (args) {
     if (args.time_format) timeFormat = args.time_format;
 });
 
-$(c).on('resume', function () {
+me.resume = function () {
     $(c).on('click', '.day, .prev, .next', onDayClick);
     $(c).on('click', '.controls .prevMonth', onPrevMonthClick);
     $(c).on('click', '.controls .nextMonth', onNextMonthClick);
@@ -46,7 +46,7 @@ $(c).on('resume', function () {
     $(views.dateValue).on('focusin', onFocus);
     $(c).on('focusout', onFocusOut);
     renderDate();
-})
+}
 
 var openingDate;
 $(views.dateHolder).on('open', function () {
