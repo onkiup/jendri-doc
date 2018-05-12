@@ -306,13 +306,21 @@ Router.load = function (target, link, args, callback) {
                 $(target).process(deps);
                 moduleCode = deps;
                 me.async.forEach(Object.keys(deps), function (key, cb) {
-                    if (typeof deps[key] != 'string') return cb();
-                    me.jendri.get(deps[key], function (e, m) {
-                        console.log(link, '<=', deps[key], e);
-                        if (e) return cb(e);
-                        deps[key] = m;
-                        cb();
-                    });
+                    if(typeof deps[key] == 'function') {
+                        // binding an event to the container
+                        fakeJQuery().on(key, deps[key]);
+                    } else if (typeof deps[key] == 'string') {
+                        // this is a dependency, we need to load it and pass
+                        // reference to it to the module
+                        me.jendri.get(deps[key], function (e, m) {
+                            console.log(link, '<=', deps[key], e);
+                            if (e) return cb(e);
+                            deps[key] = m;
+                            cb();
+                        });
+                    } else {
+                        return cb();
+                    }
                 }, function onDependenciesResolved(err) {
                     if (err) {
                         console.error('Dependencies failed for', link, ':', err);
