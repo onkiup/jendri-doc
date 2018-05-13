@@ -410,6 +410,7 @@ Router.navigate = function (url, cb) {
             url = url.substr(jj.base.length);
         } else if (url.substr(0, Math.min(20, url.length)).match('://')) {
             window.location.href = url;
+            return;
         }
         var link = decodeLink(url);
         if (!link.page) {
