@@ -147,12 +147,12 @@
 
     Jendri.register('jendri', Jendri);
 
-    var loadService = function (location, cb) {
-        ajax(location, {
+    var loadService = function (sourceUrl, cb) {
+        ajax(sourceUrl, {
             dataType: 'text',
             success: function (data) {
-                console.log('Loaded service:', location);
-                var code = data + '\n//# sourceURL=' + Jendri.source + location;
+                console.log('Loaded service:', sourceUrl);
+                var code = '//# sourceURL=' + location.protocol + "//" + location.hostname + ":" + location.port + sourceUrl + '\n' + data;
                 var fun = function (me, exports, $, jj) {
                     eval(code);
                 }
@@ -172,7 +172,7 @@
                     for (var ex in exp) {
                         Jendri.register(ex, exp[ex]);
                     }
-                    console.log('Dependencies of', location, 'resolved', e);
+                    console.log('Dependencies of', sourceUrl, 'resolved', e);
                     if (!e) $(module).triggerHandler('create');
                     if (cb) return cb(e);
                 }
@@ -200,11 +200,11 @@
                         if (e && optional) {
                             e = undefined;
                             d = undefined;
-                            console.error("optional dependency", key, "for", location, "not loaded");
+                            console.error("optional dependency", key, "for", sourceUrl, "not loaded");
                         } else if (e) {
-                            console.error("dependency", key, "for", location, "failed")
+                            console.error("dependency", key, "for", sourceUrl, "failed")
                         } else {
-                            console.info("dependency", key, "for", location, "loaded")
+                            console.info("dependency", key, "for", sourceUrl, "loaded")
                         }
                         return resolvedDependencyCallback(e, key, d);
                     });
@@ -215,7 +215,7 @@
                     var dependency = module[key];
                     console.log('Dep#', i, ':', key, '<-', typeof dependency, dependency);
                     if (typeof dependency === 'string') {
-                        console.log("dynamic dependency for", location, ":", dependency);
+                        console.log("dynamic dependency for", sourceUrl, ":", dependency);
                         resolveDependency(key, dependency);
                     } else if (typeof dependency === 'function') {
                         // a shortcut for event listeners
@@ -227,7 +227,7 @@
                         --tasks;
                     }
                 }
-                console.info("async dependencies for", location, ":", tasks);
+                console.info("async dependencies for", sourceUrl, ":", tasks);
                 if (tasks == 0) {
                     return onDependenciesResolved();
                 }

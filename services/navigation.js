@@ -28,7 +28,7 @@ me.create = function() {
     $(document).on('click', 'a', navigationEventListener);
     $(document).on('submit', 'form', navigationEventListener);
     if (document.location.hash) {
-        navigate(document.location.hash);
+        navigate(document.location.hash.substr(1));
     } else if (document.location.pathname !== jj.base) {
         me.router.navigate
     }
