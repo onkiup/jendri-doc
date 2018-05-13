@@ -145,7 +145,7 @@ Router.isUiReady = function () {
 
 Router.load = function (target, link, args, callback) {
     if (!link.substr(0, Math.min(link.length, 20)).match("://")) {
-        link = base + link;
+        link = jj.source + link;
     }
     console.log('!!!', 'loading', link, 'to', target);
     if (typeof target == "string") {
@@ -172,7 +172,7 @@ Router.load = function (target, link, args, callback) {
         }
     }
     var verifyModule = function (cb) {
-        ajax(me.jendri.source + '/' + link + '/verify.js', {
+        ajax(link + '/verify.js', {
             dataType: 'text',
             success: function (data) {
                 var code = '// ' + link + '\n' +
@@ -255,7 +255,7 @@ Router.load = function (target, link, args, callback) {
         ajax(sourceUrl, {
             dataType: 'text',
             success: function (data) {
-                var code = '//# sourceURL=' + jj.baseURL() + sourceUrl + '\n' + data;
+                var code = '//# sourceURL=' + jj.source + sourceUrl + '\n' + data;
 
                 var fun = function (me, c, $, console, jj, R) {
                     var window = me, document = c;
@@ -406,8 +406,8 @@ Router.getIds = function (container) {
 
 Router.navigate = function (url, cb) {
     var navigator = function () {
-        if (url.substr(0, base.length) === base) {
-            url = url.substr(base.length);
+        if (url.substr(0, jj.base.length) === jj.base) {
+            url = url.substr(jj.base.length);
         } else if (url.substr(0, Math.min(20, url.length)).match('://')) {
             window.location.href = url;
         }

@@ -3,6 +3,7 @@
     // ------ Dependency Injection
     var options = {
         source: 'jendri',
+        base: '/',
         startup: 'navigation',
         home: 'index',
         debug: false,
@@ -70,11 +71,8 @@
         return path;
     }
 
-    var base = Jendri.normalizeSitePath(Jendri.source);
-    Jendri.baseURL = function () {
-        return base;
-    }
-
+    Jendri.source = Jendri.normalizeSitePath(Jendri.source);
+    Jendri.base = Jendri.normalizeSitePath(Jendri.base);
 
     Jendri.read = function (tag) {
         if (hash[tag] && hash[tag].length > 0) {
@@ -100,7 +98,7 @@
             } else {
                 tagCb[tag] = [callback];
                 console.log('loading', tag, hash[tag]);
-                loadService(base + 'services/' + tag + '.js', function (e) {
+                loadService(Jendri.source + 'services/' + tag + '.js', function (e) {
                     console.log('loaded', tag, services[tag]);
                     if (e) {
                         console.error('Service not loaded:', e);
@@ -154,7 +152,7 @@
             dataType: 'text',
             success: function (data) {
                 console.log('Loaded service:', location);
-                var code = data + '\n//# sourceURL=' + base + location;
+                var code = data + '\n//# sourceURL=' + Jendri.source + location;
                 var fun = function (me, exports, $, jj) {
                     eval(code);
                 }

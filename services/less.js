@@ -26,7 +26,7 @@ exports.less = {
     },
     render: function (code, preventGlobalsModification, cb) {
         if (themeName) {
-            code = "@import '" + jj.baseURL() + themeName + "';\n" + code;
+            code = "@import '" + jj.source + themeName + "';\n" + code;
         }
         uiReady = preventGlobalsModification;
         less.render(code, function (error, result, root) {
