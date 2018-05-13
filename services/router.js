@@ -135,13 +135,6 @@ Router.default = function (link) {
     uiReady = true;
 }
 
-//
-Router.reload = function (cb) {
-    if (!uiReady) return;
-    $(mainContainer).trigger('arguments', link.args);
-    if (cb) cb();
-}
-
 Router.uiReady = function (b) {
     uiReady = b;
 }
@@ -422,21 +415,17 @@ Router.navigate = function (url, cb) {
         if (!link.page) {
             link.page = jj.home;
         }
-        if (link.page !== previousLoadedPage) {
-            Router.load(mainContainer, "pages/" + link.page, link.args, function (err) {
-                if (!err) {
-                    $(window.location).triggerHandler('change');
-                } else {
-                    previousLoadedPage = link.page;
-                }
+        Router.load(mainContainer, "pages/" + link.page, link.args, function (err) {
+            if (!err) {
+                $(window.location).triggerHandler('change');
+            } else {
+                previousLoadedPage = link.page;
+            }
 
-                if (cb) {
-                    cb(err);
-                }
-            })
-        } else {
-            Router.reload(cb);
-        }
+            if (cb) {
+                cb(err);
+            }
+        });
     };
 
     if (!uiReady) {
