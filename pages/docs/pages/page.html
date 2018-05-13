@@ -1,0 +1,72 @@
+<h1>Jendri pages</h1>
+<p>
+    Jendri pages are almost the same as <a href="docs/widgets">widgets</a>, except for several moments:
+</p>
+<ul>
+    <li>
+        At any moment there can be only one page running
+    </li>
+    <li>
+        The running page is determined by the current url value
+    </li>
+    <li>
+        All pages are located under the "page" directory
+    </li>
+</ul>
+<p>
+    To call a page, at your browser address bar append the pound sign and the page address (relative to the "pages" directory):
+</p>
+<pre>
+    http://yourwebsite.com/#article
+    http://yourwebsite.com/#register
+</pre>
+<p>
+    You can pass some arguments to the page that you want to load:
+</p>
+<pre>
+    http://yourwebsite.com/#article?id=97465
+    http://yourwebsite.com/#register?role=admin
+</pre>
+<p>
+    If you will change arguments inside of the address bar, loaded page will get the "arguments" event as described
+    on the "<a href="#docs/widgets">widgets page</a>
+</p>
+<p>
+    To load any page from your code, use the 'router.navigate' function or any other url changing method:
+</p>
+<pre>
+    me.router = 'router';
+    $(c).on('resume', function() {
+        me.router.navigate('profile');
+        // or
+        window.location.hash = 'profile';
+    }
+</pre>
+
+<h2>Interfaces</h2>
+<p>
+    Interfaces wrap any loaded page and provide some useful and static website elements: menu, sidebars, etc. Technically
+    interfaces realization is the same as widgets and pages, but you can't embed them or call them from the browser address
+    bar. All interfaces are located under the 'interfaces' directory.
+</p>
+<p>
+    Interfaces are also used to define global variables in less templates by sharing "theme.less" interface file.
+</p>
+<p>To change current interface, use the "router.setUI" method:</p>
+<pre>
+    me.router = 'router';
+    $(c).on('resume', function() {
+        if (window.user) {
+            if (window.user.admin) {
+                Router.setUI('admin');
+            } else {
+                Router.setUI('user');
+            }
+        } else {
+            Router.setUI('guest');
+        }
+    }
+</pre>
+<p>
+    It's always a better idea to have a separate website for your admin-panel ;-)
+</p>

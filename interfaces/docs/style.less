@@ -73,27 +73,24 @@
 
   ul#head {
     width: 80%;
-    height: 59px;
+    min-height: 59px;
     padding: 0px;
-    position: absolute;
+    position: relative;
     margin: 0px;
-    top: -5px;
+    top: -10px;
     left: 10%;
     border-radius: 5px;
     list-style: none;
-    overflow: hidden;
     display: block;
 
     li {
       float: left;
       background-color: #000;
       color: #fff;
-      border-radius: 5px;
-      height: 100%;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      height: 59px;
       margin-left: 10px;
-      line-height: 59px;
-      padding-left: 10px;
-      padding-right: 10px;
       cursor: pointer;
 
       &:hover {
@@ -101,9 +98,14 @@
       }
 
       a {
-        padding: 0;
+        display: inline-block;
+        padding-left: 10px;
+        padding-right: 10px;
+        height: 100%;
         color: white;
         text-decoration: none;
+        border-bottom: none;
+        line-height: 59px;
       }
 
       &#logo {
@@ -119,7 +121,6 @@
         padding: 0px;
         font-size: 3em;
         text-align: center;
-        padding-top: 5px;
         &:hover {
           opacity: 0.7;
         }
@@ -129,6 +130,7 @@
           outline: none;
           text-decoration: none;
           border: none;
+          padding: 0px;
         }
       }
 
@@ -139,8 +141,8 @@
   > #content {
     margin-left: 10%;
     margin-right: 10%;
-    margin-top: 100px;
     margin-bottom: 35px;
+    display: inline-block;
   }
 
   #foot {

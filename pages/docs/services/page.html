@@ -1,0 +1,68 @@
+<h1>Jendri services.</h1>
+
+<p>In Jendri all services are located in the "/services" directory. All services has their name, which should be the
+    same as the name of their file. To connect a service to any of your js-code files, add it's name as the value of
+    any field of you js-code "this" (or "me") object. In example, this code will inject the chart.js library
+    onto the field "me.chart":
+</p>
+<pre>
+    me.async = 'chart';
+</pre>
+<p>
+    Every service is encapsulated into it's own environment so there should be no conflicts between them.
+</p>
+<p>
+    <a href="#docs/injections">read more about injections</a>
+</p>
+
+<h2>service lifecycle</h2>
+<p>
+    Jendri defines some lifecycle events for every compatible service (loaded without the dollar prefix). These events
+    are emitted on the service's <a href="#docs/environment">environment object</a>. Here is the list of all of these
+    events in their natural order:
+</p>
+<ul>
+    <li>depfail — when any of required dependencies failed to load</li>
+    <li>create — when the service and all of it's dependencies are loaded</li>
+    <li>resume — when the service was injected to the first service's client module</li>
+    <li>pause — when the service isn't injected to any module</li>
+    <li>destroy — when the 'beforeunload' event emited by the browser</li>
+</ul>
+<p>
+    Please note, that all of the service dependencies can be inaccessible before the "create" event emitted.
+</p>
+
+<h2>Registering the service</h2>
+<p>
+    Every compatible service after being initialized should register itself with Jendry:
+</p>
+<pre>
+    $(me).on('create', function() {
+        me.jendri.register('name', serviceObject);
+        // or
+        me.jendri.register(['name', 'tag'], serviceObject);
+    }
+</pre>
+<p>
+    Here the name refers to the service name, tag — service tag (or alias) and serviceObject — to a shared between
+    modules service object. If the compatible service will not register itself, Jendri will decide that service failed
+    to initialize and will emit the 'depfail' event to the module that requested the service.
+</p>
+<h2>Loading libraries after initialization</h2>
+<p>
+    You can load a service after your module initialized by calling <i>me.jendri.get</i> method:
+</p>
+<pre>
+    me.jendri.get('libtag', function callback(error, service) { });
+</pre>
+<p>
+    If you want to check is a service already loaded, you can call <i>me.jendri.read</i> method:
+</p>
+<pre>
+    var service = me.jendri.read('tag');
+    if (service != null) {
+        // service is loaded
+    } else {
+        // there was no service with the given tag
+    }
+</pre>

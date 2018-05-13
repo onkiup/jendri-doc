@@ -1,0 +1,98 @@
+<h2>Jendri widgets</h2>
+<p>
+    Widgets in Jendri are main website building blocks. Usually they responsible of content, look and behavior
+    of their html-container contents, so they consist of three files:
+</p>
+<ol>
+    <li>
+        page.html — html-template, that will be injected inside of the html-container before widget will be started.
+    </li>
+    <li>
+        style.less — less-code, that will affect how the html-container contents will look.
+    </li>
+    <li>
+        code.js — javascript code that will create widget's behavior.
+    </li>
+</ol>
+<p>
+    To create a widget, create a subdirectory in the "widgets" directory and place there at least
+    one of the "page.html" or "code.js" files:
+</p>
+<pre>
+    /widgets/
+        menu/
+            page.html
+        picker/
+            date/
+                code.js
+                page.html
+                style.less
+</pre>
+<p>
+    To inject a widget, set the "widget" attribute of any html component to a widget address in the "widgets" directory:
+</p>
+<pre>
+    &lt;div widget="menu"/>
+    &lt;div widget="picker/date"/>
+</pre>
+
+<h2>Widget lifecycle</h2>
+<p>
+    During the widget lifecycle, Jendri Router emits some events on it's html-container element:
+</p>
+<ul>
+    <li>
+        start — when the widget and all it's required dependencies had loaded
+    </li>
+    <li>
+        resume — when the widget's html-container becomes visible and available for user
+    </li>
+    <li>
+        pause — when the widget's html-container is no longer visible or available for user
+    </li>
+    <li>
+        free — when the widget should be unloaded
+    </li>
+    <li>
+        arguments — when any new arguments had been passed to the widget through it's address
+    </li>
+</ul>
+<h2>Widget arguments</h2>
+<p>
+    There is several ways to pass some arguments to the widget: through it's html-container, through it's address or
+    through it's process object.
+</p>
+<h3>Html-container arguments</h3>
+<p>
+    First of all, when it starts, your widget can check some attributes on it's html-container. But also you can pass
+    some html-code to the widget, setting it's html-container contents <b>before</b> the widget is loaded. When Jendri
+    will load the widget's template file, it will append contents of the container to the "content" tag:
+</p>
+<pre>
+    &lt;-- this is an example of widget html-template that able to hold passed html-content: -->
+    Hello! Your passed html content is: &lt;content/>
+</pre>
+<h3>Address arguments</h3>
+<p>
+    When you inserting a widget, you can pass some arguments to it as you pass arguments at HTTP GET-requests:
+</p>
+<pre>
+    &lt;div widget="calendar?month=september"/>
+</pre>
+<p>
+    In this case after the Calendar widget will be loaded, Jendri will emit the 'arguments' event to the widget with
+    the arguments that you declared in the widget address.
+</p>
+<h3>Process arguments</h3>
+<p>
+    Your widget can provide some interface to control it through it's process object:
+</p>
+<pre>
+    me.setMonth = function(month) { /* ... */ };
+</pre>
+<p>
+    To access this interface, get the widget process object and call any of widget's declared public functions:
+</p>
+<pre>
+    $(month_widget_container).process().setMonth('september');
+</pre>
