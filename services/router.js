@@ -255,7 +255,7 @@ Router.load = function (target, link, args, callback) {
         ajax(sourceUrl, {
             dataType: 'text',
             success: function (data) {
-                var code = '//# sourceURL=' + jj.source + sourceUrl + '\n' + data;
+                var code = '//# sourceURL=' + location.protocol + "//" + location.hostname + ":" + location.port + sourceUrl + '\n' + data;
 
                 var fun = function (me, c, $, console, jj, R) {
                     var window = me, document = c;
