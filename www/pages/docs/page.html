@@ -1,0 +1,111 @@
+<h1>Welcome to Jendri documentation website</h1>
+
+<p>
+    Jendri is an operation system for your websites that allows you to develop them and reuse your code much more easily.
+    Using Jendri, you can split your front-end code to a small pieces which we call widgets, pages, interfaces and services.
+    <nobr>It takes care</nobr> about all of your needs, providing you:
+    <ul>
+        <li>Ability to reuse your code through widgets</li>
+        <li>Automatic dependency injection</li>
+        <li>Automatic url routing</li>
+        <li>On-demand built-in libraries: jquery, less, async, debug console, chart.js</li>
+        <li>Production client-side html, javascript code and css styles caching based on IndexedDB</li>
+    </ul>
+</p>
+
+<h2>Quick Start — widgets</h2>
+<p>
+    The main concept of Jendri is to split website pages into small reusable parts, called widgets. Every widget contains three files:
+    one for it's html-view, one for it's stylesheet and one for it's javascript code. These files are called page.html,
+    style.css (or style.css if LESS library is provided) and code.js. In favor of simplicity, Jendry doesn't provide
+    any template engine, so all of your html manipulations should be done in your javascript code.
+</p>
+<p>
+    Usage of widgets is pretty simple: just add a "widget" attribute to the element where you want to place your widget.
+    In example, to use the time picker widget you should make something like this:
+</p>
+<div class="openable">
+    <a href="javascript:void(0)">&lt;div widget="picker/time"/></a> (click to see the result)
+    <font class="hidden">
+        <div widget="picker/time"/>
+    </font>
+</div>
+<p>
+    It worth to mention that this plugin also requires some js-libraries for working, so Jendri automatically loaded them
+    before it started the widget. Every widget runs in it's own environment, so you can embed as many widgets as you want.
+    Even more: you can reuse widgets inside any other widget, like the time interval picking widget does:
+</p>
+<div widget="picker/time/interval" style="position: relative; display: inline-block"/>
+<p>
+    Cool, yeah? :)
+</p>
+<p>
+    To learn more about widgets, please visit <a href="#docs/widgets">this page</a>
+</p>
+
+<h2>Quick start — pages</h2>
+<p>
+    Pages are widgets that represent some different type of content (or, in case of this site, different content itself).
+    Every page has it's own address which can be entered by user on his web-browser address bar. Matching between addresses
+    and pages in Jendri executed via router service and reffered as routing. Routing algorithm is actually pretty simple:
+</p>
+<ol>
+    <li>Check the anchor part of current webpage url, use it as a page location base</li>
+    <li>If the anchor part is empty, use the configuration variable "home"</li>
+    <li>Prepend the page location base with the "source" configuration value and "/page/" prefix</li>
+    <li>Try to load widget from the resulting address</li>
+</ol>
+<p>
+    To learn more about pages, please visit <a href="#docs/pages">this page</a>
+</p>
+
+<H2>Quick start — services</H2>
+<p>
+    Services are js-libraries, that you can use with Jendri. Our service loading algorithm was design to support any
+    library that you probably will need. To add a new library, simply place it under the "library" directory. To mention
+    any library as dependency, add it's filename without extension as a value of any string field of your widget, page or library environment:
+</p>
+<pre>
+    this.datejs = 'datejs';
+    // or:
+    me.datejs = 'datejs';
+</pre>
+<p>
+    If you are trying to load library that wasn't designed to work with Jendry, simply prefix it with a dollar sign. Please note,
+    that in this case you should name the library file exactly as it's global (window) variable named. In example:
+</p>
+<pre>
+    me.async = '$async';
+</pre>
+<p>
+    If one of the libraries is optional, you can prefix it with a tilda sign:
+</p>
+<pre>
+    me.appcache = '~appcache';
+    me.less = '~$less';
+</pre>
+<p>
+    Please note, that the tilda sign always should lead to any other prefixes.
+</p>
+<p>
+    To learn more about services, please visit <a href="#docs/services">this page</a>
+</p>
+<h2>Quick start — interfaces</h2>
+<p>
+    To use the same page in different environments you can use interfaces. Interfaces are made as container widgets for pages.
+    When the router service tries to load a page, it will place it inside of the element of current interface that has a "content" id.
+</p>
+<p>
+    You can use interfaces, in example, to provide different site layouts for different types of users.
+</p>
+<p>
+    To learn more about interfaces, please visit <a href="#docs/interfaces">this page</a>
+</p>
+<H2>Caching</H2>
+<p>
+    After reading this article you may ask: "what about perfomance? It seems that this library splits a website into
+    a huge amout of small files, shouldn't it increase page loading time and overload my server?". You're almost right except for one thing:
+    Jendri has integrated application cache library that automatically stores contents of your widgets and services at a client's web browser,
+    so actually it makes your website load and work much more faster and slightly decreases overload of your server! And this library supports
+    versioning of your website, so you can be always sure that your visitors will always get the latest version!
+</p>
